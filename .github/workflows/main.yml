@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # Execution: Temporary PostgreSQL instance for the migration check
       postgres:
         image: postgres:15
         env:
@@ -18,12 +17,12 @@ jobs:
           POSTGRES_PASSWORD: password
         ports:
           - 5432:5432
-      # Execution: Ensuring the DB is ready before backend steps run
-      options: >-
-        --health-cmd pg_isready
-        --health-interval 10s
-        --health-timeout 5s
-        --health-retries 5
+        # Execution: These flags must be on a single line under 'options'
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
