@@ -1,22 +1,37 @@
-# Healthcare Management Portal (HMP)
-**A Comprehensive Enterprise Solution for Healthcare Data & Patient Management**
+                                                            Healthcare Management Portal (HMP)
 
-### Executive Summary
-This portal is a full-stack monorepo designed for high-integrity healthcare data management. It leverages a modern **React-Django-PostgreSQL** stack, containerized with Docker and governed by a rigorous GitHub Actions CI/CD pipeline.
+🏥 Executive Summary
 
-An Enterprise-Ready Healthcare Data Management SystemExecutive Summary The project is a full-stack monorepo that can be used to manage patients and providers in a scalable way. It is based on a contemporary React-Django-PostgreSQL stack, containerized with Docker and managed by a strict GitHub Actions CI/CD flow.🏗 System ArchitectureThe diagram below shows a functional separation of the HMS ecosystem, which emphasizes the communication between the decoupled frontend and the containerized backend services.Infrastructure & DevOps: Orchestrated with Docker Compose locally and using GitHub Actions to verify on the cloud.Frontend Development (React): A component-based interface based on React 18, with Doctor and Patient-specific dashboards.Backend Development (Django): A Python 3.13 REST API layer with JWT authentication, migrations, and business logic.Persistence Layer: PostgreSQL 15 will offer a relational data integrity to all the records related to patients and appointments.🛠 Core Tech Stack backend Python 3.13 / Django / REST FrameworkFrontend React 18 / Node 18DatabasePostgreSQL 15CI/CD GitHub Actions (YAML)
-|human|>|human|>|human|>- .github/workflows/ock
-├── backend/core/ Django Settings and Manage.pyanage.py
-├── backend/appointments/ # Micro-service logic to schedule.
-├── frontend/ source of React application.ation source
-└── docker-compose.yml    # Local Orchestration
-🚦 Development Standards & CI/CDTo ensure the integrity of the system, this repository implements a Pull Request (PR) Workflow:Direct Pushes Forbidden: The master branch is secured to maintain the quality of code.Automated Gatekeeping: Each PR will spin up a PostgreSQL inside a GitHub Action, run the migrations, and build the React production bundle.Zero-Warning Policy: Builds are set to regard warnings as errors so as to make linting correct.Merge Requirement: The merge button is only activated when there is a successful green build. PowerShell# 1 Local Setup. Clone and Initialize
-git clone <repo-url>
+The Healthcare Management Portal is an enterprise-grade full-stack monorepo designed for high-integrity healthcare data and patient management. It leverages a modern React-Django-PostgreSQL stack, fully containerized with Docker and governed by a rigorous GitHub Actions CI/CD pipeline.
 
-# 2. Boot Infrastructure
+🏗 System ArchitectureThe following diagram illustrates the functional separation of the HMP ecosystem, highlighting the interaction between decoupled services and the persistence layer.
+
+Infrastructure & DevOps: Managed via Docker Compose for local orchestration and GitHub Actions for automated cloud verification.
+
+Frontend (React): Component-driven UI utilizing React 18, featuring role-based dashboards for Doctors and Patients.
+
+Backend (Django): Python 3.13 REST API handling JWT authentication, migrations, and business logic.
+
+Persistence Layer: PostgreSQL 15 ensures relational data integrity for all healthcare records.
+
+🛠 Core Tech Stack
+
+Component,                      Technology Stack
+
+Backend,Python 3.13 / Django / REST Framework
+Frontend,React 18 / Node 18
+Database,PostgreSQL 15
+Infrastructure,Docker & GitHub Actions
+
+
+ComponentTechnology StackBackendPython 3.13 / Django / REST FrameworkFrontendReact 18 / Node 18DatabasePostgreSQL 15InfrastructureDocker & GitHub Actions
+🚦 CI/CD & Development StandardsThis repository enforces strict Continuous Integration to maintain professional-grade stability:Automated Gatekeeping: Every Pull Request (PR) triggers an automated build that verifies database migrations and React production builds.Branch Protection: Direct pushes to master are restricted; code must pass the Integrity Audit via the CI/CD pipeline before merging.Zero-Warning Policy: Builds are configured to treat warnings as errors to ensure maximum code quality.🚀 Local ExecutionPowerShell# 1. Clone the repository
+git clone https://github.com/pokhrel-dev/healthcare-management-portal.git
+
+# 2. Initialize Infrastructure
 docker-compose up --build
 
-# 3. Install Migrations (when not running in Docker)
+# 3. Apply Schema Migrations
 cd backend/core
 python manage.py migrate
-🗺 Roadmap (Next Implementation Blocks)Dashboard Extension: Adding role-based Medical Staff and Patient views.Automated Testing: Backend (PyTest) and frontend (Jest) component integration.Data Engineering: Silver/Platinum data expansion to support advanced healthcare analytics.
+🗺 RoadmapRole-Based Access: Specialized dashboards for Medical Staff and Patients.Automated Testing: PyTest integration for backend logic and Jest for UI components.Data Engineering: Expansion of Silver/Platinum data layers for advanced analytics.

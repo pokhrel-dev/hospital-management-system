@@ -85,7 +85,7 @@ function HospitalPortal() {
     <div style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80")', backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
       {!isLoggedIn ? (
         <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', width: '400px', textAlign: 'center' }}>
-          <h2>{isRegistering ? 'New Patient' : 'Hospital Portal'}</h2>
+          <h2>{isRegistering ? 'New Patient' : 'Health Care Portal'}</h2>
           {message.text && <p style={{ color: message.type === 'success' ? 'green' : 'red' }}>{message.text}</p>}
           <form onSubmit={isRegistering ? handleSignUp : handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <input placeholder="Full Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} style={{ padding: '10px' }} required />
