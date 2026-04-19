@@ -57,12 +57,12 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres', 
         'USER': 'postgres', 
-        'PASSWORD': 'your_aws_db_password', 
-        'HOST': 'your-rds-endpoint.xxxxx.us-east-1.rds.amazonaws.com', # ONLY the endpoint here
+        'PASSWORD': 'your_actual_aws_password', # Replace with the password you used in AWS
+        'HOST': 'your-rds-endpoint.xxxx.us-east-1.rds.amazonaws.com', # Use ONLY the endpoint URL here
         'PORT': '5432',
         'OPTIONS': {
             'sslmode': 'verify-full',
-            'sslrootcert': os.path.join(BASE_DIR, 'global-bundle.pem'), # Ensure the pem file is in your backend folder
+            'sslrootcert': os.path.join(BASE_DIR, 'global-bundle.pem'), 
         },
     }
 }
