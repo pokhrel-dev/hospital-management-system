@@ -12,6 +12,7 @@ function HospitalPortal() {
   const [isRegistering, setIsRegistering] = useState(false);
 
   useEffect(() => {
+    // Fetch doctors for the dropdown and name lookup
     fetch('http://localhost:8000/appointments/doctors/')
       .then(res => res.json())
       .then(data => setDoctors(data));
@@ -112,19 +113,28 @@ function HospitalPortal() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ backgroundColor: '#eee' }}>
-                  <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>Doctor ID</th>
+                  <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>Doctor Name</th>
                   <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>Date & Time</th>
                 </tr>
               </thead>
               <tbody>
                 {appointments
                   .filter(app => app.patient_name === currentPatient?.name)
-                  .map((app, index) => (
-                    <tr key={index}>
-                      <td style={{ padding: '10px', border: '1px solid #ddd' }}>{app.doctor}</td>
-                      <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(app.appointment_date).toLocaleString()}</td>
-                    </tr>
-                  ))}
+                  .sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date))
+                  .map((app, index) => {
+                    // Senior Logic: Find the doctor name from the doctors array using the ID
+                    const doctor = doctors.find(d => d.id === parseInt(app.doctor));
+                    return (
+                      <tr key={index}>
+                        <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                          {doctor ? `Dr. ${doctor.name}` : `ID: ${app.doctor}`}
+                        </td>
+                        <td style={{ padding: '10px', border: '1px solid #ddd' }}>
+                          {new Date(app.appointment_date).toLocaleString()}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
             {appointments.filter(app => app.patient_name === currentPatient?.name).length === 0 && (
