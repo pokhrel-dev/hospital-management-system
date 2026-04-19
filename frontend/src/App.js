@@ -42,23 +42,26 @@ import React, { useState, useEffect } from 'react';
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Senior Implementation: Requesting JWT tokens from the backend
+      // Senior Implementation: Sending credentials for a JWT token
       const response = await fetch('http://localhost:8000/api/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: patientName, password: password }), 
+        body: JSON.stringify({ 
+          username: patientName, // Enter 'admin1' here in the UI
+          password: password     // Enter your new password here in the UI
+        }), 
       });
 
       if (response.ok) {
         const data = await response.json();
+        // Storing the "Passports" for future requests
         localStorage.setItem('accessToken', data.access);
         localStorage.setItem('refreshToken', data.refresh);
         
         setIsLoggedIn(true);
         setCurrentPatient({ name: patientName });
-        setPatientName(''); // CLEAR DETAILS: Prepares login for next session
+        setPatientName(''); 
         setPassword('');
-        setMessage({ text: 'Logged in successfully!', type: 'success' });
         fetchAppointments();
       } else {
         setMessage({ text: 'Invalid username or password.', type: 'error' });
