@@ -57,7 +57,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres', 
         'USER': 'postgres', 
-        'PASSWORD': 'Mylohealthportal', # Use your actual AWS DB password here
+        'PASSWORD': 'your_aws_db_password', # Use your actual password here
         'HOST': 'hmp-prod-db.c4r8qswuinow.us-east-1.rds.amazonaws.com', 
         'PORT': '5432',
         'OPTIONS': {
