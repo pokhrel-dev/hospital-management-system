@@ -55,11 +55,15 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres', # Or your specific DB name
-        'USER': 'postgres', # Or your AWS Master Username
-        'PASSWORD': 'your_aws_db_password', # Replace with your actual password
-        'HOST': 'your-rds-endpoint.xxxxx.us-east-1.rds.amazonaws.com', # GET THIS FROM AWS PORTAL
+        'NAME': 'postgres', 
+        'USER': 'postgres', 
+        'PASSWORD': 'your_aws_db_password', 
+        'HOST': 'your-rds-endpoint.xxxxx.us-east-1.rds.amazonaws.com', # ONLY the endpoint here
         'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'verify-full',
+            'sslrootcert': os.path.join(BASE_DIR, 'global-bundle.pem'), # Ensure the pem file is in your backend folder
+        },
     }
 }
 
