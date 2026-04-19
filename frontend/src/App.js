@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 function HospitalPortal() {
   const [patientName, setPatientName] = useState('');
   const [selectedDoctor, setSelectedDoctor] = useState('');
-  const [appointmentDate, setAppointmentDate] = useState(''); // New State for Date
+  const [appointmentDate, setAppointmentDate] = useState('');
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -39,14 +39,13 @@ function HospitalPortal() {
     setPatientName('');
   };
 
-  /* --- FIXED REGISTRATION LOGIC --- */
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
       const response = await fetch('http://localhost:8000/appointments/patients/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: patientName }), // Ensure this matches your Django model field
+        body: JSON.stringify({ name: patientName }),
       });
 
       if (response.ok) {
@@ -57,11 +56,10 @@ function HospitalPortal() {
         setMessage({ text: `Registration failed: ${JSON.stringify(errorData)}`, type: 'error' });
       }
     } catch (err) {
-      setMessage({ text: 'Backend unreachable. Check Docker.', type: 'error' });
+      setMessage({ text: 'Backend unreachable.', type: 'error' });
     }
   };
 
-  /* --- UPDATED BOOKING WITH DATE/TIME --- */
   const bookAppointment = async (e) => {
     e.preventDefault();
     const response = await fetch('http://localhost:8000/appointments/book/', {
@@ -70,7 +68,7 @@ function HospitalPortal() {
       body: JSON.stringify({ 
         patient_name: currentPatient.name, 
         doctor: selectedDoctor,
-        appointment_date: appointmentDate // Sending the picked date
+        appointment_date: appointmentDate 
       }),
     });
 
@@ -96,6 +94,7 @@ function HospitalPortal() {
       ) : (
         <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', width: '90%', maxWidth: '900px' }}>
           <h2>Welcome, {currentPatient?.name} <button onClick={() => setIsLoggedIn(false)} style={{ float: 'right' }}>Logout</button></h2>
+          
           <div style={{ padding: '20px', backgroundColor: '#f9f9f9', border: '1px solid #ddd', marginBottom: '20px' }}>
             <h3>Schedule New Appointment</h3>
             <form onSubmit={bookAppointment} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -103,12 +102,35 @@ function HospitalPortal() {
                 <option value="">Select Doctor</option>
                 {doctors.map(doc => <option key={doc.id} value={doc.id}>Dr. {doc.name}</option>)}
               </select>
-              {/* DATE TIME PICKER */}
               <input type="datetime-local" value={appointmentDate} onChange={(e) => setAppointmentDate(e.target.value)} style={{ flex: '1', padding: '10px' }} required />
               <button type="submit" style={{ backgroundColor: '#003366', color: 'white', padding: '10px 20px' }}>Confirm</button>
             </form>
           </div>
-          {/* Table remains the same but displays the chosen date */}
+
+          <div style={{ marginTop: '20px' }}>
+            <h3>Your Scheduled Appointments</h3>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#eee' }}>
+                  <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>Doctor ID</th>
+                  <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments
+                  .filter(app => app.patient_name === currentPatient?.name)
+                  .map((app, index) => (
+                    <tr key={index}>
+                      <td style={{ padding: '10px', border: '1px solid #ddd' }}>{app.doctor}</td>
+                      <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(app.appointment_date).toLocaleString()}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+            {appointments.filter(app => app.patient_name === currentPatient?.name).length === 0 && (
+              <p style={{ textAlign: 'center', marginTop: '10px' }}>No appointments found for your account.</p>
+            )}
+          </div>
         </div>
       )}
     </div>
