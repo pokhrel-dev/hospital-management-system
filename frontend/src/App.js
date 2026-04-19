@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 
-function HospitalPortal() {
+ function HealthcareManagementPortal() {
   const [patientName, setPatientName] = useState('');
+  const [password, setPassword] = useState(''); // Added for JWT
   const [selectedDoctor, setSelectedDoctor] = useState('');
   const [appointmentDate, setAppointmentDate] = useState('');
   const [doctors, setDoctors] = useState([]);
@@ -11,63 +12,79 @@ function HospitalPortal() {
   const [currentPatient, setCurrentPatient] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
+  // Load data and check session on startup
   useEffect(() => {
     fetch('http://localhost:8000/appointments/doctors/')
       .then(res => res.json())
       .then(data => setDoctors(data));
-    fetchAppointments();
+    
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      setIsLoggedIn(true);
+      fetchAppointments();
+      // In a real app, you'd fetch the user profile here
+    }
   }, []);
 
   const fetchAppointments = () => {
-    fetch('http://localhost:8000/appointments/book/')
+    const token = localStorage.getItem('accessToken');
+    fetch('http://localhost:8000/appointments/book/', {
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      }
+    })
       .then(res => res.json())
-      .then(data => setAppointments(data));
+      .then(data => {
+        if (Array.isArray(data)) setAppointments(data);
+      });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch('http://localhost:8000/appointments/patients/');
-    const patients = await res.json();
-    const existing = patients.find(p => p.name.trim().toLowerCase() === patientName.trim().toLowerCase());
-
-    if (!existing) {
-      setMessage({ text: 'User not found. Please register.', type: 'error' });
-      return;
-    }
-    
-    setIsLoggedIn(true);
-    setCurrentPatient(existing);
-    setPatientName(''); // CLEAR DETAILS: Prepares login for next patient
-    setMessage({ text: '', type: '' }); // Clear any previous error messages
-  };
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/appointments/patients/', {
+      // Senior Implementation: Requesting JWT tokens from the backend
+      const response = await fetch('http://localhost:8000/api/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: patientName }),
+        body: JSON.stringify({ username: patientName, password: password }), 
       });
 
       if (response.ok) {
-        setMessage({ text: 'Success! You can now Sign In.', type: 'success' });
-        setPatientName(''); // Clear name after successful registration
-        setIsRegistering(false);
+        const data = await response.json();
+        localStorage.setItem('accessToken', data.access);
+        localStorage.setItem('refreshToken', data.refresh);
+        
+        setIsLoggedIn(true);
+        setCurrentPatient({ name: patientName });
+        setPatientName(''); // CLEAR DETAILS: Prepares login for next session
+        setPassword('');
+        setMessage({ text: 'Logged in successfully!', type: 'success' });
+        fetchAppointments();
       } else {
-        const errorData = await response.json();
-        setMessage({ text: `Registration failed: ${JSON.stringify(errorData)}`, type: 'error' });
+        setMessage({ text: 'Invalid username or password.', type: 'error' });
       }
     } catch (err) {
-      setMessage({ text: 'Backend unreachable.', type: 'error' });
+      setMessage({ text: 'Authentication server unreachable.', type: 'error' });
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setIsLoggedIn(false);
+    setCurrentPatient(null);
+    setAppointments([]);
   };
 
   const bookAppointment = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('accessToken');
     const response = await fetch('http://localhost:8000/appointments/book/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({ 
         patient_name: currentPatient.name, 
         doctor: selectedDoctor,
@@ -82,19 +99,21 @@ function HospitalPortal() {
     }
   };
 
-  // CANCEL BUTTON LOGIC
   const cancelAppointment = async (id) => {
     if (window.confirm("Are you sure you want to cancel this appointment?")) {
+      const token = localStorage.getItem('accessToken');
       const response = await fetch(`http://localhost:8000/appointments/book/${id}/`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.ok) {
         setMessage({ text: 'Appointment successfully cancelled.', type: 'success' });
-        // Update local state to remove the item immediately
         setAppointments(appointments.filter(app => app.id !== id));
       } else {
-        setMessage({ text: 'Failed to cancel appointment. Check backend permissions.', type: 'error' });
+        setMessage({ text: 'Failed to cancel. Check permissions.', type: 'error' });
       }
     }
   };
@@ -103,17 +122,22 @@ function HospitalPortal() {
     <div style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1600&q=80")', backgroundSize: 'cover', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', fontFamily: 'Arial, sans-serif' }}>
       {!isLoggedIn ? (
         <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', width: '400px', textAlign: 'center' }}>
-          <h2>{isRegistering ? 'New Patient Registration' : 'Health Care Portal'}</h2>
+          <h2>{isRegistering ? 'Register' : 'Healthcare Management Portal'}</h2>
           {message.text && <p style={{ color: message.type === 'success' ? 'green' : 'red' }}>{message.text}</p>}
-          <form onSubmit={isRegistering ? handleSignUp : handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <input placeholder="Full Name" value={patientName} onChange={(e) => setPatientName(e.target.value)} style={{ padding: '10px' }} required />
-            <button type="submit" style={{ backgroundColor: '#003366', color: 'white', padding: '12px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}>{isRegistering ? 'REGISTER' : 'SIGN IN'}</button>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <input placeholder="Username" value={patientName} onChange={(e) => setPatientName(e.target.value)} style={{ padding: '10px' }} required />
+            <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} style={{ padding: '10px' }} required />
+            <button type="submit" style={{ backgroundColor: '#003366', color: 'white', padding: '12px', cursor: 'pointer', border: 'none', borderRadius: '4px' }}>
+              {isRegistering ? 'REGISTER' : 'SIGN IN'}
+            </button>
           </form>
-          <button onClick={() => setIsRegistering(!isRegistering)} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#003366', cursor: 'pointer' }}>{isRegistering ? 'Already have an account? Sign In' : 'Need an account? Create one'}</button>
+          <button onClick={() => setIsRegistering(!isRegistering)} style={{ marginTop: '10px', background: 'none', border: 'none', color: '#003366', cursor: 'pointer' }}>
+            {isRegistering ? 'Back to Login' : 'Create Account'}
+          </button>
         </div>
       ) : (
         <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '8px', width: '90%', maxWidth: '1000px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-          <h2>Welcome, {currentPatient?.name} <button onClick={() => setIsLoggedIn(false)} style={{ float: 'right', padding: '5px 10px', cursor: 'pointer' }}>Logout</button></h2>
+          <h2>Welcome! <button onClick={handleLogout} style={{ float: 'right', padding: '5px 10px', cursor: 'pointer' }}>Logout</button></h2>
           
           {message.text && <p style={{ color: message.type === 'success' ? 'green' : 'red', fontWeight: 'bold' }}>{message.text}</p>}
 
@@ -141,7 +165,6 @@ function HospitalPortal() {
               </thead>
               <tbody>
                 {appointments
-                  .filter(app => app.patient_name === currentPatient?.name)
                   .sort((a, b) => new Date(a.appointment_date) - new Date(b.appointment_date))
                   .map((app, index) => {
                     const doctor = doctors.find(d => d.id === parseInt(app.doctor));
@@ -150,21 +173,13 @@ function HospitalPortal() {
                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>{doctor ? `Dr. ${doctor.name}` : `ID: ${app.doctor}`}</td>
                         <td style={{ padding: '12px', border: '1px solid #ddd' }}>{new Date(app.appointment_date).toLocaleString()}</td>
                         <td style={{ padding: '12px', border: '1px solid #ddd', textAlign: 'center' }}>
-                          <button 
-                            onClick={() => cancelAppointment(app.id)} 
-                            style={{ backgroundColor: '#d9534f', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}
-                          >
-                            Cancel
-                          </button>
+                          <button onClick={() => cancelAppointment(app.id)} style={{ backgroundColor: '#d9534f', color: 'white', border: 'none', padding: '6px 12px', cursor: 'pointer', borderRadius: '4px' }}>Cancel</button>
                         </td>
                       </tr>
                     );
                   })}
               </tbody>
             </table>
-            {appointments.filter(app => app.patient_name === currentPatient?.name).length === 0 && (
-              <p style={{ textAlign: 'center', marginTop: '20px', color: '#666' }}>You have no scheduled appointments.</p>
-            )}
           </div>
         </div>
       )}
@@ -172,4 +187,4 @@ function HospitalPortal() {
   );
 }
 
-export default HospitalPortal;
+export default HealthcareManagementPortal;
