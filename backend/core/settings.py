@@ -65,14 +65,14 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
+        'NAME': os.environ.get('DB_NAME'), # No default 'postgres'
+        'USER': os.environ.get('DB_USER'), # No default 'postgres'
         'PASSWORD': os.environ.get('DB_PASSWORD'), 
-        'HOST': os.environ.get('DB_HOST'),
+        'HOST': os.environ.get('DB_HOST'), # No default 'localhost'
         'PORT': os.environ.get('DB_PORT', '5432'),
         'OPTIONS': {
             'sslmode': 'verify-full',
-            'sslrootcert': os.path.join(BASE_DIR, 'global-bundle.pem'), # Required for AWS
+            'sslrootcert': os.path.join(BASE_DIR, 'global-bundle.pem'),
         },
     }
 }
