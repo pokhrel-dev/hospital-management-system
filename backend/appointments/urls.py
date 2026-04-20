@@ -1,16 +1,16 @@
-from django.urls import path
-from .views import (
-    DoctorListView, 
-    PatientListView, 
-    AppointmentListCreateView, 
-    AppointmentDetailView # Use this for Retrieve, Update, and Delete
-)
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+# ADD AppointmentDetailView to your imports
+from .views import PatientViewSet, AppointmentListCreateView, AppointmentDetailView 
+
+router = DefaultRouter()
+router.register(r'patients', PatientViewSet, basename='patient') # Added basename for clarity
 
 urlpatterns = [
-    path('doctors/', DoctorListView.as_view(), name='doctor-list'),
-    path('patients/', PatientListView.as_view(), name='patient-list'),
-    path('book/', AppointmentListCreateView.as_view(), name='appointment-list-create'),
+    # Router handles: /patients/ and /patients/{id}/
+    path('', include(router.urls)), 
     
-    # THIS IS THE MISSING LINK: It allows the DELETE method for a specific ID
+    # Static paths
+    path('book/', AppointmentListCreateView.as_view(), name='book-appointment'),
     path('book/<int:pk>/', AppointmentDetailView.as_view(), name='appointment-detail'),
 ]
