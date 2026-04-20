@@ -14,7 +14,9 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 # 3. SECURITY SETTINGS
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-0(rq15ugp7a#!g3l0*wez(l3bz2a8!7$!otq1_1_w6f5jaea51')
 DEBUG = True
-ALLOWED_HOSTS = ['*']
+# settings.py update
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.awsapprunner.com'] # Add your cloud domain here
+#ALLOWED_HOSTS = ['*']
 
 # 4. APPLICATION DEFINITION
 INSTALLED_APPS = [
