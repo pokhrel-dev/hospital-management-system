@@ -30,7 +30,6 @@ jobs:
       run: curl -s https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o backend/global-bundle.pem
 
     - name: Run Cloud Database Migrations
-      # CRITICAL: This block maps your GitHub Secrets to the runner's environment
       env:
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_USER: ${{ secrets.DB_USER }}
