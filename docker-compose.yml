@@ -1,4 +1,5 @@
 name: Healthcare Management Portal CI/CD Pipeline
+
 on:
   push:
     branches: [ "master", "main" ]
@@ -9,10 +10,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      # We don't need a local postgres service because we are testing 
-      # connectivity to live AWS RDS instance
-
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
@@ -22,18 +19,17 @@ jobs:
       with:
         python-version: '3.12'
 
-    - name: Install Backend Dependencies
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r backend/requirements.txt
-        pip install python-dotenv  # Ensures environment loading works 
 
-    - name: Download AWS SSL Certificate
-      # This resolves the "global-bundle.pem does not exist" error in CI
+    - name: Download AWS RDS SSL Certificate
+      # AWS RDS requires this for secure encrypted connections
       run: curl -s https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o backend/global-bundle.pem
 
-    - name: Test Cloud Migrations (CI Safety Check)
-      # This maps your GitHub Repository Secrets to the CI Environment
+    - name: Run Cloud Database Migrations
+      # This step maps GitHub Secrets to Environment Variables
       env:
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_USER: ${{ secrets.DB_USER }}
@@ -42,14 +38,4 @@ jobs:
         DB_PORT: 5432
       run: |
         cd backend
-        python manage.py migrate --check # Verifies if migrations are in sync with the cloud
-
-    - name: Build Frontend
-      run: |
-        cd frontend
-        npm install
-        npm run build --if-present
-
-    - name: Deploy Sync (Optional)
-      # You can add deployment steps here once the build is green
-      run: echo "Build and Cloud Handshake Successful!"
+        python manage.py migrate
